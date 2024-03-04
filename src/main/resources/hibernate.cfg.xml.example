@@ -1,0 +1,35 @@
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 5.3//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-5.3.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+        <!-- Informacje o połączeniu z bazą danych -->
+        <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+        <property name="hibernate.connection.url"></property>
+        <property name="hibernate.connection.username"></property>
+        <property name="hibernate.connection.password"></property>
+
+        <!-- Dialekt bazy danych -->
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</property>
+
+        <!-- Wyświetlanie wygenerowanych zapytań SQL -->
+        <property name="show_sql">true</property>
+
+        <!-- Automatyczne aktualizowanie schematu bazy danych (create)-->
+        <property name="hibernate.hbm2ddl.auto">update</property>
+
+        <!-- Zdefiniowane mapowania encji -->
+        <mapping class="model.Hotel"/>
+        <mapping class="model.Employee"/>
+        <mapping class="model.Customer"/>
+        <mapping class="model.Payment"/>
+        <mapping class="model.Reservation"/>
+        <mapping class="model.Room"/>
+        <mapping class="model.ReservationDetails"/>
+
+
+        <!-- Możesz dodać więcej mapowań encji tutaj -->
+
+    </session-factory>
+</hibernate-configuration>
