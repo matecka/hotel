@@ -1,16 +1,16 @@
 package dao;
 
 import config.HibernateUtil;
-import model.Employee;
+import exception.ReservationException;
 import model.Reservation;
-import model.Room;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 public class ReservationDao {
-    public Optional<Reservation> getReservationById(Long reservationId) {
+    public Optional<Reservation> getOptionalReservationById(Long reservationId) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
@@ -26,6 +26,9 @@ public class ReservationDao {
         }
     }
 
+    public Reservation getReservationById(Long reservationId) {
+        return getOptionalReservationById(reservationId).orElseThrow(() -> new ReservationException("reservation not found", LocalDate.now()));
+    }
 
     public void createReservation(Reservation reservation) {
         Transaction transaction = null;
@@ -57,7 +60,6 @@ public class ReservationDao {
         }
         return updatedReservation;
     }
-
 
 
     public boolean deleteReservation(Long reservationId) {

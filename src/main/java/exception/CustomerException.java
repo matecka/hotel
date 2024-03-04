@@ -2,11 +2,11 @@ package exception;
 
 import java.time.LocalDate;
 
-public class GuestException extends RuntimeException {
+public class CustomerException extends RuntimeException {
     private String message;
     private LocalDate date;
 
-    public GuestException(String message, LocalDate date) {
+    public CustomerException(String message, LocalDate date) {
         this.message = message;
         this.date = date;
     }

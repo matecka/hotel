@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import model.Customer;
 
 import java.time.LocalDate;
 
@@ -14,7 +15,8 @@ import java.time.LocalDate;
 @Builder
 public class UpdateReservationRequest {
 
-
     private LocalDate startDate;
     private LocalDate endDate;
+    private Long customer_id;
+    private Long payment_id;
 }

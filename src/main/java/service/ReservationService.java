@@ -1,19 +1,15 @@
 package service;
 
+import dao.CustomerDao;
+import dao.PaymentDao;
 import dao.ReservationDao;
 import dao.RoomDao;
 import dto.request.ReservationRequest;
 import dto.request.UpdateReservationRequest;
 import dto.response.ReservationResponse;
-import exception.ReservationException;
-
 import mapper.ReservationMapper;
-import model.Guest;
-import model.Reservation;
-import model.ReservationDetails;
-import model.Room;
+import model.*;
 
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,55 +20,66 @@ public class ReservationService {
     private ReservationDao reservationDao;
     private ReservationMapper reservationMapper;
 
-    private RoomService roomService;
+
     private RoomDao roomDao;
 
-    public ReservationService(ReservationDao reservationDao, RoomService roomService, ReservationMapper reservationMapper, RoomDao roomDao) {
+    private CustomerDao customerDao;
+    private PaymentDao paymentDao;
+
+    public ReservationService(ReservationDao reservationDao, RoomDao roomDao, ReservationMapper reservationMapper, CustomerDao customerDao, PaymentDao paymentDao) {
         this.reservationDao = reservationDao;
-        this.roomService = roomService;
         this.reservationMapper = reservationMapper;
-        this.roomDao= roomDao;
+        this.roomDao = roomDao;
+        this.customerDao = customerDao;
+        this.paymentDao = paymentDao;
     }
 
-    //todo w request dodac goscia i payment, po sprawdzeniu crud dla guest i payment
-    public ReservationResponse updateReservation(UpdateReservationRequest updateReservationRequest,Long id) {
-        Reservation reservation = reservationDao.getReservationById(id).orElseThrow(() -> new ReservationException("reservation not found", LocalDate.now()));
-        reservation.setStartDate(updateReservationRequest.getStartDate());
-        reservation.setEndDate(updateReservationRequest.getEndDate());
+
+    public ReservationResponse updateReservation(UpdateReservationRequest updateReservationRequest, Long id) {
+        reservationDao.getReservationById(id);
+        Payment payment = paymentDao.getPaymentById(updateReservationRequest.getPayment_id());
+        Customer customer = customerDao.getCustomerById(updateReservationRequest.getCustomer_id());
+
+        Reservation reservation = Reservation.builder()
+                .startDate(updateReservationRequest.getStartDate())
+                .endDate(updateReservationRequest.getEndDate())
+                .payment(payment)
+                .customer(customer)
+                .build();
+
         Reservation updateReservation = reservationDao.updateReservation(reservation);
+
         return reservationMapper.from(updateReservation);
     }
 
-//    public void createReservation(ReservationRequest reservationRequest) {
-//        Reservation reservation = Reservation.builder()
-//                .startDate(reservationRequest.getStartDate())
-//                .endDate(reservationRequest.getEndDate())
-//                .build();
-//
-//        reservationDao.createReservation(reservation);
-//    }
 
     public void deleteReservation(Long id) {
         reservationDao.deleteReservation(id);
     }
 
-    public Reservation getReservationById(Long id) {
-        return reservationDao.getReservationById(id)
-                .orElseThrow(() -> new ReservationException("reservation not found", LocalDate.now()));
+    public ReservationResponse getReservationById(Long id) {
+        Reservation reservation = reservationDao.getReservationById(id);
+        return reservationMapper.from(reservation);
     }
 
-    public void createReservation(ReservationRequest reservationRequest) {
-
+    public ReservationResponse createReservation(ReservationRequest reservationRequest) {
+        Reservation reservation = new Reservation();
         Set<Room> rooms = reservationRequest.getRoomId().stream()
-                .map(roomId -> roomService.getRoomById(roomId))
+                .map(roomId -> roomDao.getRoomById(roomId))
                 .collect(Collectors.toSet());
 
-        Reservation reservation = Reservation.builder()
-                .startDate(reservationRequest.getStartDate())
-                .endDate(reservationRequest.getEndDate())
-                .build();
+        Customer customer = customerDao.getCustomerById(reservationRequest.getCustomerId());
+        Payment payment = paymentDao.getPaymentById(reservationRequest.getPaymentId());
+        upsertReservation(reservation, reservationRequest, customer, payment);
 
+        Set<ReservationDetails> details = createReservationDetails(rooms, reservation);
+        reservation.setReservationDetails(details);
 
+        reservationDao.createReservation(reservation);
+        return reservationMapper.from(reservation);
+    }
+
+    public Set<ReservationDetails> createReservationDetails(Set<Room> rooms, Reservation reservation) {
         Set<ReservationDetails> reservationDetailsSet = new HashSet<>();
         for (Room room : rooms) {
             ReservationDetails reservationDetails = ReservationDetails.builder()
@@ -81,12 +88,19 @@ public class ReservationService {
                     .build();
             reservationDetailsSet.add(reservationDetails);
         }
-        reservation.setReservationDetails(reservationDetailsSet);
-
-        reservationDao.createReservation(reservation);
+        return reservationDetailsSet;
     }
 
-    public void isExistsRoom(List<Long> roomIds){
+    public void upsertReservation(Reservation reservation, ReservationRequest reservationRequest, Customer customer, Payment payment) {
+        reservation.builder()
+                .startDate(reservationRequest.getStartDate())
+                .endDate(reservationRequest.getEndDate())
+                .customer(customer)
+                .payment(payment)
+                .build();
+    }
+
+    public void isExistsRoom(List<Long> roomIds) {
 
     }
 

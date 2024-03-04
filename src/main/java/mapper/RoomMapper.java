@@ -1,6 +1,5 @@
 package mapper;
 
-import dto.request.RoomRequest;
 import dto.response.RoomResponse;
 import model.Room;
 

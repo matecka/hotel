@@ -14,10 +14,10 @@ import java.time.LocalDate;
 
 public class RoomService {
 
-    private RoomMapper roomMapper;
-
     private RoomDao roomDao;
     private HotelDao hotelDao;
+
+    private RoomMapper roomMapper;
 
     public RoomService(RoomDao roomDao, HotelDao hotelDao, RoomMapper roomMapper) {
         this.roomDao = roomDao;
@@ -25,32 +25,40 @@ public class RoomService {
         this.roomMapper = roomMapper;
     }
 
-    public Room getRoomById(Long id) {
-
-        return roomDao.getRoomById(id).orElseThrow(() -> new RoomException("room not found", LocalDate.now()));//todo Exception
-
+    public RoomResponse getRoomById(Long id) {
+        Room room = roomDao.getRoomById(id);
+        return roomMapper.from(room);
     }
 
     public RoomResponse createRoom(RoomRequest roomRequest) {
 
-        Hotel hotel = hotelDao.getHotelById(roomRequest.getHotelId()).orElseThrow(() -> new RoomException("room not found", LocalDate.now()));
+        Hotel hotel = hotelDao.getHotelById(roomRequest.getHotelId());
 
-        Room room = Room.builder().hotel(hotel).name(roomRequest.getName()).description(roomRequest.getDescription()).capacity(roomRequest.getCapacity()).status(roomRequest.getStatus()).price(roomRequest.getPrice()).build();
+        Room room = Room.builder()
+                .hotel(hotel)
+                .name(roomRequest.getName())
+                .description(roomRequest.getDescription())
+                .capacity(roomRequest.getCapacity())
+                .status(roomRequest.getStatus())
+                .price(roomRequest.getPrice())
+                .build();
         roomDao.createRoom(room);
         return roomMapper.from(room);
 
     }
 
-    public void updateRoom(UpdateRoomRequest updateRoomRequest) {
-        Room room = roomDao.getRoomById(updateRoomRequest.getId()).orElseThrow(() -> new RoomException("room not found", LocalDate.now()));
-
-        room.setName(updateRoomRequest.getName());
-        room.setDescription(updateRoomRequest.getDescription());
-        room.setCapacity(updateRoomRequest.getCapacity());
-        room.setPrice(updateRoomRequest.getPrice());
-        room.setStatus(updateRoomRequest.getStatus());
+    public RoomResponse updateRoom(UpdateRoomRequest updateRoomRequest) {
+        roomDao.getRoomById(updateRoomRequest.getId());
+        Room room = Room.builder()
+                .name(updateRoomRequest.getName())
+                .description(updateRoomRequest.getDescription())
+                .capacity(updateRoomRequest.getCapacity())
+                .price(updateRoomRequest.getPrice())
+                .status(updateRoomRequest.getStatus())
+                .build();
 
         roomDao.updateRoom(room);
+        return roomMapper.from(room);
 
     }
 

@@ -3,7 +3,9 @@ package service;
 import dao.EmployeeDao;
 import dto.request.EmployeeRequest;
 import dto.request.UpdateEmployeeRequest;
+import dto.response.EmployeeResponse;
 import exception.EmployeeException;
+import mapper.EmployeeMapper;
 import model.Employee;
 
 import java.time.LocalDate;
@@ -11,12 +13,14 @@ import java.time.LocalDate;
 public class EmployeeService {
 
     private EmployeeDao employeeDao;
+    private EmployeeMapper employeeMapper;
 
-    public EmployeeService(EmployeeDao employeeDao) {
+    public EmployeeService(EmployeeDao employeeDao, EmployeeMapper employeeMapper) {
         this.employeeDao = employeeDao;
+        this.employeeMapper = employeeMapper;
     }
 
-    public void updateEmployee(UpdateEmployeeRequest updateEmployeeRequest) {
+    public EmployeeResponse updateEmployee(UpdateEmployeeRequest updateEmployeeRequest) {
         employeeDao.getEmployeeById(updateEmployeeRequest.getId()).orElseThrow(() -> new EmployeeException("employee not found", LocalDate.now()));
 
         Employee employee = Employee.builder()
@@ -30,9 +34,10 @@ public class EmployeeService {
                 .email(updateEmployeeRequest.getEmail()).build();
 
         employeeDao.updateEmployee(employee);
+        return employeeMapper.from(employee);
     }
 
-    public void createEmployee(EmployeeRequest employeeRequest) {
+    public EmployeeResponse createEmployee(EmployeeRequest employeeRequest) {
         Employee employee = Employee.builder()
                 .name(employeeRequest.getName())
                 .surname(employeeRequest.getSurname())
@@ -43,13 +48,15 @@ public class EmployeeService {
                 .email(employeeRequest.getEmail()).build();
 
         employeeDao.createEmployee(employee);
+        return employeeMapper.from(employee);
     }
 
     public void deleteEmployee(Long id) {
         employeeDao.deleteEmployee(id);
     }
 
-    public Employee getEmployeeById(Long id) {
-        return employeeDao.getEmployeeById(id).orElseThrow(() -> new EmployeeException("employee not found", LocalDate.now()));
+    public EmployeeResponse getEmployeeById(Long id) {
+        Employee employee = employeeDao.getEmployeeById(id).orElseThrow(() -> new EmployeeException("employee not found", LocalDate.now()));
+        return employeeMapper.from(employee);
     }
 }

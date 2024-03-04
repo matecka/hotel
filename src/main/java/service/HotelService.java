@@ -3,37 +3,51 @@ package service;
 import dao.HotelDao;
 import dto.request.HotelRequest;
 import dto.request.UpdateHotelRequest;
-
-import exception.HotelException;
+import dto.response.HotelResponse;
+import mapper.HotelMapper;
 import model.Hotel;
-
-import java.time.LocalDate;
 
 public class HotelService {
 
     private HotelDao hotelDao;
+    private HotelMapper hotelMapper;
 
-    public HotelService(HotelDao hotelDao) {
+    public HotelService(HotelDao hotelDao, HotelMapper hotelMapper) {
         this.hotelDao = hotelDao;
+        this.hotelMapper = hotelMapper;
     }
 
-    public void updateHotel(UpdateHotelRequest updateHotelRequest) {
-        hotelDao.getHotelById(updateHotelRequest.getId()).orElseThrow(() -> new HotelException("hotel not found", LocalDate.now()));
-        Hotel hotel = Hotel.builder().id(updateHotelRequest.getId()).name(updateHotelRequest.getName()).address(updateHotelRequest.getAddress()).email(updateHotelRequest.getEmail()).phone(updateHotelRequest.getPhone()).build();
+    public HotelResponse updateHotel(UpdateHotelRequest updateHotelRequest) {
+        hotelDao.getHotelById(updateHotelRequest.getId());
+
+        Hotel hotel = Hotel.builder()
+                .id(updateHotelRequest.getId())
+                .name(updateHotelRequest.getName())
+                .address(updateHotelRequest.getAddress())
+                .email(updateHotelRequest.getEmail())
+                .phone(updateHotelRequest.getPhone()).build();
         hotelDao.updateHotel(hotel);
+        return hotelMapper.from(hotel);
     }
 
-    public void createHotel(HotelRequest hotelRequest) {
-        Hotel hotel = Hotel.builder().name(hotelRequest.getName()).address(hotelRequest.getAddress()).phone(hotelRequest.getPhone()).email(hotelRequest.getEmail()).build();
+    public HotelResponse createHotel(HotelRequest hotelRequest) {
+        Hotel hotel = Hotel.builder()
+                .name(hotelRequest.getName())
+                .address(hotelRequest.getAddress())
+                .phone(hotelRequest.getPhone())
+                .email(hotelRequest.getEmail()).build();
         hotelDao.saveHotel(hotel);
+        return hotelMapper.from(hotel);
+
     }
 
     public void deleteHotel(Long id) {
         hotelDao.deleteHotel(id);
     }
 
-    public Hotel getHotelById(Long id) {
-        return hotelDao.getHotelById(id).orElseThrow(() -> new HotelException("hotel not found", LocalDate.now()));
+    public HotelResponse getHotelById(Long id) {
+        Hotel hotel = hotelDao.getHotelById(id);
+        return hotelMapper.from(hotel);
     }
 
 

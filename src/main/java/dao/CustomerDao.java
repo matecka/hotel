@@ -1,21 +1,23 @@
 package dao;
 
 import config.HibernateUtil;
-import model.Guest;
+import exception.CustomerException;
+import model.Customer;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
-public class GuestDao {
+public class CustomerDao {
 
-    public Optional<Guest> getGuestById(Long guestId) {
+    public Optional<Customer> getOptionalCustomerById(Long customerId) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            Guest guest = session.get(Guest.class, guestId);
+            Customer customer = session.get(Customer.class, customerId);
             transaction.commit();
-            return Optional.ofNullable(guest);
+            return Optional.ofNullable(customer);
         } catch (Exception e) {
             if (transaction != null) {
                 transaction.rollback();
@@ -25,11 +27,15 @@ public class GuestDao {
         }
     }
 
-    public void createGuest(Guest guest) {
+    public Customer getCustomerById(Long customerId) {
+        return getOptionalCustomerById(customerId).orElseThrow(() -> new CustomerException("guest not found", LocalDate.now()));
+    }
+
+    public void createCustomer(Customer customer) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            session.save(guest);
+            session.save(customer);
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
@@ -39,11 +45,11 @@ public class GuestDao {
         }
     }
 
-    public void updateGuest(Guest guest) {
+    public void updateCustomer(Customer customer) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            session.update(guest);
+            session.update(customer);
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
@@ -53,16 +59,16 @@ public class GuestDao {
         }
     }
 
-    public boolean deleteGuest(Long guestId) {
+    public boolean deleteCustomer(Long guestId) {
         Transaction transaction = null;
         boolean isDeleted = false;
 
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
 
-            Guest guest = session.get(Guest.class, guestId);
-            if (guest != null) {
-                session.delete(guest);
+            Customer customer = session.get(Customer.class, guestId);
+            if (customer != null) {
+                session.delete(customer);
                 isDeleted = true;
             }
 

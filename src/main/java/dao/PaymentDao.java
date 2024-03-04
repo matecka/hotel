@@ -1,17 +1,17 @@
 package dao;
 
 import config.HibernateUtil;
-import model.Employee;
+import exception.PaymentException;
 import model.Payment;
-import model.Room;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 public class PaymentDao {
 
-    public Optional<Payment> getPaymentById(Long paymentId) {
+    public Optional<Payment> getOptionalPaymentById(Long paymentId) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
@@ -27,6 +27,10 @@ public class PaymentDao {
         }
     }
 
+    public Payment getPaymentById(Long paymentId) {
+       return getOptionalPaymentById(paymentId).orElseThrow(() -> new PaymentException("payment not found", LocalDate.now()));
+
+    }
 
 
     public void createPayment(Payment payment) {

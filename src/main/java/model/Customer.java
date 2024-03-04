@@ -9,7 +9,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
-public class Guest {
+public class Customer {
 
     @Id
     @GeneratedValue
@@ -20,7 +20,7 @@ public class Guest {
     private String email;
     private String address;
 
-    @OneToMany(mappedBy = "guest", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Set<Reservation> reservations;

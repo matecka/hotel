@@ -4,7 +4,6 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.Set;
 
 @Data
@@ -21,10 +20,10 @@ public class Reservation {
     private LocalDate endDate;
 
     @ManyToOne
-    @JoinColumn(name = "guest_id")
+    @JoinColumn(name = "customer_id")
     @EqualsAndHashCode.Exclude
-    private Guest guest;
-
+    private Customer customer;
+    private Integer personCount;
     @OneToOne
     private Payment payment;
 

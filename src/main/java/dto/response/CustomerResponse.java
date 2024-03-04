@@ -1,4 +1,4 @@
-package dto.request;
+package dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UpdateGuestRequest {
+public class CustomerResponse {
 
-    private Long id;
     private String name;
     private String surname;
     private String phone;

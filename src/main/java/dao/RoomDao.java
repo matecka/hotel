@@ -1,14 +1,16 @@
 package dao;
 
 import config.HibernateUtil;
+import exception.RoomException;
 import model.Room;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 public class RoomDao {
-    public Optional<Room> getRoomById(Long roomId) {
+    public Optional<Room> getOptionalRoomById(Long roomId) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
@@ -21,8 +23,13 @@ public class RoomDao {
             }
             e.printStackTrace();
             return Optional.empty();
-            }
+        }
     }
+
+    public Room getRoomById(Long roomId) {
+        return getOptionalRoomById(roomId).orElseThrow(() -> new RoomException("room not found", LocalDate.now()));
+    }
+
 
     public void createRoom(Room room) {
         Transaction transaction = null;
