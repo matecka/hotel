@@ -1,16 +1,15 @@
 package dao;
 
-
 import config.HibernateUtil;
 import exception.HotelException;
 import model.Hotel;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
 import java.time.LocalDate;
 import java.util.Optional;
 
 public class HotelDao {
+
     public void saveHotel(Hotel hotel) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -56,7 +55,8 @@ public class HotelDao {
     }
 
     public Hotel getHotelById(Long hotelId) {
-       return getOptionalHotelById(hotelId).orElseThrow(() -> new HotelException("hotel not found", LocalDate.now()));
+       return getOptionalHotelById(hotelId)
+               .orElseThrow(() -> new HotelException("hotel not found", LocalDate.now()));
     }
 
     public boolean deleteHotel(Long hotelId) {

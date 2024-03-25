@@ -5,12 +5,9 @@ import dao.RoomDao;
 import dto.request.RoomRequest;
 import dto.request.UpdateRoomRequest;
 import dto.response.RoomResponse;
-import exception.RoomException;
 import mapper.RoomMapper;
 import model.Hotel;
 import model.Room;
-
-import java.time.LocalDate;
 
 public class RoomService {
 

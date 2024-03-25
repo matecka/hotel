@@ -5,7 +5,6 @@ import exception.PaymentException;
 import model.Payment;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -28,7 +27,8 @@ public class PaymentDao {
     }
 
     public Payment getPaymentById(Long paymentId) {
-       return getOptionalPaymentById(paymentId).orElseThrow(() -> new PaymentException("payment not found", LocalDate.now()));
+       return getOptionalPaymentById(paymentId)
+               .orElseThrow(() -> new PaymentException("payment not found", LocalDate.now()));
 
     }
 

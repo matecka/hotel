@@ -5,7 +5,6 @@ import exception.CustomerException;
 import model.Customer;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -28,7 +27,7 @@ public class CustomerDao {
     }
 
     public Customer getCustomerById(Long customerId) {
-        return getOptionalCustomerById(customerId).orElseThrow(() -> new CustomerException("guest not found", LocalDate.now()));
+        return getOptionalCustomerById(customerId).orElseThrow(() -> new CustomerException("Customer not found", LocalDate.now()));
     }
 
     public void createCustomer(Customer customer) {

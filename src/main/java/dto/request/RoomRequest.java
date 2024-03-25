@@ -1,9 +1,7 @@
 package dto.request;
 
 import lombok.*;
-
 import java.math.BigDecimal;
-
 
 @Builder
 @Data
@@ -16,7 +14,6 @@ public class RoomRequest {
     private String status;
     private Integer capacity;
     private BigDecimal price;
-
     private Long hotelId;
 
 }

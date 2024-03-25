@@ -5,7 +5,6 @@ import exception.ReservationException;
 import model.Reservation;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -27,7 +26,8 @@ public class ReservationDao {
     }
 
     public Reservation getReservationById(Long reservationId) {
-        return getOptionalReservationById(reservationId).orElseThrow(() -> new ReservationException("reservation not found", LocalDate.now()));
+        return getOptionalReservationById(reservationId)
+                .orElseThrow(() -> new ReservationException("reservation not found", LocalDate.now()));
     }
 
     public void createReservation(Reservation reservation) {

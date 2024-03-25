@@ -27,7 +27,8 @@ public class RoomDao {
     }
 
     public Room getRoomById(Long roomId) {
-        return getOptionalRoomById(roomId).orElseThrow(() -> new RoomException("room not found", LocalDate.now()));
+        return getOptionalRoomById(roomId)
+                .orElseThrow(() -> new RoomException("room not found", LocalDate.now()));
     }
 
 

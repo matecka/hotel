@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import model.enums.Status;
-
 import javax.persistence.*;
 import java.time.LocalDate;
 

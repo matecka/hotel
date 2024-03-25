@@ -1,6 +1,5 @@
 package mapper;
 
-
 import dto.response.HotelResponse;
 import model.Hotel;
 

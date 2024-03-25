@@ -50,5 +50,4 @@ public class HotelService {
         return hotelMapper.from(hotel);
     }
 
-
 }
