@@ -8,6 +8,7 @@ import dto.request.ReservationRequest;
 import dto.response.ReservationResponse;
 import mapper.ReservationMapper;
 import model.*;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,39 +34,49 @@ public class ReservationService {
         this.paymentDao = paymentDao;
     }
 
-    public Reservation updateReservation(Long reservation_id, ReservationRequest reservationRequest, Long customerId, Long paymentId) {
-        Reservation reservationById = reservationDao.getReservationById(reservation_id);
-        reservationById.setStartDate(reservationRequest.getStartDate());
-        reservationById.setEndDate(reservationRequest.getEndDate());
-        reservationById.setCustomer(customerDao.getCustomerById(customerId));
-        reservationById.setPayment(paymentDao.getPaymentById(paymentId));
+    public Reservation updateReservation(Long reservationId,
+                                         ReservationRequest reservationRequest,
+                                         Long customerId,
+                                         Long paymentId) {
 
-        Set<ReservationDetails> existingDetails = reservationById.getReservationDetails();
+        Reservation reservationById = reservationDao.getReservationById(reservationId);
+        upsertReservation(reservationById, reservationRequest, customerId, paymentId);
 
+        updateOrCreateReservationDetails(reservationById, reservationRequest);
+
+        Reservation reservation = reservationDao.updateReservation(reservationById);
+
+        return reservation;
+    }
+
+    public void updateOrCreateReservationDetails(Reservation reservation, ReservationRequest reservationRequest) {
+
+        Set<ReservationDetails> existingDetails = reservation.getReservationDetails();
         existingDetails = existingDetails != null ? existingDetails : new HashSet<>();
 
         List<Long> newRoomIds = reservationRequest.getRoomId();
-
         existingDetails.removeIf(detail -> !newRoomIds.contains(detail.getRoom().getId()));
-
-        Set<ReservationDetails> newDetails = new HashSet<>();
-        for (Long roomId : newRoomIds) {
-            boolean containsRoom = existingDetails.stream()
-                    .anyMatch(detail -> detail.getRoom().getId().equals(roomId));
-            if (!containsRoom) {
-                Room room = roomDao.getRoomById(roomId);
-                newDetails.add(ReservationDetails.builder()
-                        .reservation(reservationById)
-                        .room(room)
-                        .build());
-            }
-        }
-
-        existingDetails.addAll(newDetails);
-
-        Reservation reservation1 = reservationDao.updateReservation(reservationById);
-        return reservation1;
+        addNewDetails(existingDetails, newRoomIds, reservation);
     }
+
+public void addNewDetails(Set<ReservationDetails> existingDetails,
+                          List<Long> newRoomIds,
+                          Reservation reservationById){
+
+    Set<ReservationDetails> newDetails = new HashSet<>();
+    for (Long roomId : newRoomIds) {
+        boolean containsRoom = existingDetails.stream()
+                .anyMatch(detail -> detail.getRoom().getId().equals(roomId));
+        if (!containsRoom) {
+            Room room = roomDao.getRoomById(roomId);
+            newDetails.add(ReservationDetails.builder()
+                    .reservation(reservationById)
+                    .room(room)
+                    .build());
+        }
+    }
+    existingDetails.addAll(newDetails);
+}
 
     public void deleteReservation(Long id) {
         reservationDao.deleteReservation(id);
@@ -82,9 +93,7 @@ public class ReservationService {
                 .map(roomId -> roomDao.getRoomById(roomId))
                 .collect(Collectors.toSet());
 
-        Customer customer = customerDao.getCustomerById(reservationRequest.getCustomerId());
-        Payment payment = paymentDao.getPaymentById(reservationRequest.getPaymentId());
-        reservation = upsertReservation(reservation, reservationRequest, customer, payment);
+        reservation = upsertReservation(reservation, reservationRequest, reservationRequest.getCustomerId(), reservationRequest.getPaymentId());
 
         Set<ReservationDetails> details = createReservationDetails(rooms, reservation);
         reservation.setReservationDetails(details);
@@ -105,15 +114,19 @@ public class ReservationService {
         return reservationDetailsSet;
     }
 
-
-    public Reservation upsertReservation(Reservation reservation, ReservationRequest reservationRequest, Customer customer, Payment payment) {
+//todo customer and payment - to check, now returns old reservation
+    public Reservation upsertReservation(Reservation reservation,
+                                         ReservationRequest reservationRequest,
+                                         Long customerId,
+                                         Long paymentId) {
         return reservation.builder()
                 .startDate(reservationRequest.getStartDate())
                 .endDate(reservationRequest.getEndDate())
-                .customer(customer)
-                .payment(payment)
+                .customer(customerDao.getCustomerById(customerId))
+                .payment(paymentDao.getPaymentById(paymentId))
                 .build();
     }
+
 
     public void isExistsRoom(List<Long> roomIds) {
 
