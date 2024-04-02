@@ -9,6 +9,7 @@ import model.enums.Status;
 import service.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 
 public class Main {
@@ -67,34 +68,36 @@ public class Main {
         ReservationMapper reservationMapper = new ReservationMapper();
         ReservationService reservationService = new ReservationService(reservationDao, roomDao, reservationMapper, customerDao, paymentDao);
         ReservationRequest request = ReservationRequest.builder()
-                .roomId(Collections.singletonList(9L))
+                .roomId(Arrays.asList(9L, 36L,38L))
                 .startDate(LocalDate.now())
                 .endDate(LocalDate.of(2024, 4, 2))
                 .customerId(1L)
                 .paymentId(3L)
                 .build();
-        ReservationResponse reservationResponse = reservationService.createReservation(request);
-        System.out.println(reservationResponse);
+//        ReservationResponse reservationResponse = reservationService.createReservation(request);
+//        System.out.println(reservationResponse);
 
-        Reservation reservation1 = Reservation.builder()
-                .startDate(LocalDate.now())
-                .endDate(LocalDate.of(2024, 3, 23))
-                .build();
-
-        Customer customer1 = Customer.builder()
-                .address("addresssao")
-                .name("Updatek")
-                .email("updf")
-                .surname("surwisko")
-                .phone("777 777 000")
-                .build();
-
-        Payment payment1 = Payment.builder()
-                .status(Status.FAILED)
-                .date(LocalDate.now())
-                .build();
-        Reservation reservation = reservationService.updateReservation(33L, request, 6L, 15L);
+//        Reservation reservation1 = Reservation.builder()
+//                .startDate(LocalDate.now())
+//                .endDate(LocalDate.of(2024, 3, 23))
+//                .build();
+//
+//        Customer customer1 = Customer.builder()
+//                .address("addresssao")
+//                .name("Updatek")
+//                .email("updf")
+//                .surname("surwisko")
+//                .phone("777 777 000")
+//                .build();
+//
+//        Payment payment1 = Payment.builder()
+//                .status(Status.FAILED)
+//                .date(LocalDate.now())
+//                .build();
+        Reservation reservation = reservationService.updateReservation(91L, request, 10L, 100L);
         System.out.println(reservation);
+
+
 
     }
 

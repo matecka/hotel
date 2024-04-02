@@ -59,24 +59,24 @@ public class ReservationService {
         addNewDetails(existingDetails, newRoomIds, reservation);
     }
 
-public void addNewDetails(Set<ReservationDetails> existingDetails,
-                          List<Long> newRoomIds,
-                          Reservation reservationById){
+    public void addNewDetails(Set<ReservationDetails> existingDetails,
+                              List<Long> newRoomIds,
+                              Reservation reservationById) {
 
-    Set<ReservationDetails> newDetails = new HashSet<>();
-    for (Long roomId : newRoomIds) {
-        boolean containsRoom = existingDetails.stream()
-                .anyMatch(detail -> detail.getRoom().getId().equals(roomId));
-        if (!containsRoom) {
-            Room room = roomDao.getRoomById(roomId);
-            newDetails.add(ReservationDetails.builder()
-                    .reservation(reservationById)
-                    .room(room)
-                    .build());
+        Set<ReservationDetails> newDetails = new HashSet<>();
+        for (Long roomId : newRoomIds) {
+            boolean containsRoom = existingDetails.stream()
+                    .anyMatch(detail -> detail.getRoom().getId().equals(roomId));
+            if (!containsRoom) {
+                Room room = roomDao.getRoomById(roomId);
+                newDetails.add(ReservationDetails.builder()
+                        .reservation(reservationById)
+                        .room(room)
+                        .build());
+            }
         }
+        existingDetails.addAll(newDetails);
     }
-    existingDetails.addAll(newDetails);
-}
 
     public void deleteReservation(Long id) {
         reservationDao.deleteReservation(id);
@@ -114,17 +114,18 @@ public void addNewDetails(Set<ReservationDetails> existingDetails,
         return reservationDetailsSet;
     }
 
-//todo customer and payment - to check, now returns old reservation
+
     public Reservation upsertReservation(Reservation reservation,
                                          ReservationRequest reservationRequest,
                                          Long customerId,
                                          Long paymentId) {
-        return reservation.builder()
-                .startDate(reservationRequest.getStartDate())
-                .endDate(reservationRequest.getEndDate())
-                .customer(customerDao.getCustomerById(customerId))
-                .payment(paymentDao.getPaymentById(paymentId))
-                .build();
+
+        reservation.setStartDate(reservationRequest.getStartDate());
+        reservation.setEndDate(reservationRequest.getEndDate());
+        reservation.setCustomer(customerDao.getCustomerById(customerId));
+        reservation.setPayment(paymentDao.getPaymentById(paymentId));
+
+        return reservation;
     }
 
 
