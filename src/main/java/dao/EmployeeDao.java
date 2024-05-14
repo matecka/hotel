@@ -1,10 +1,13 @@
 package dao;
 
 import config.HibernateUtil;
+import model.Customer;
 import model.Employee;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public class EmployeeDao {
@@ -75,5 +78,22 @@ public class EmployeeDao {
         }
 
         return isDeleted;
+    }
+
+
+    public List<Employee> getAllEmployees() {
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            List<Employee> employees = session.createQuery("FROM Employee", Employee.class).list();
+            transaction.commit();
+            return employees;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
     }
 }

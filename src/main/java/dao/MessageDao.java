@@ -1,24 +1,25 @@
 package dao;
 
 import config.HibernateUtil;
-import exception.CustomerException;
-import model.Customer;
+import exception.MessageException;
+import model.Message;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class CustomerDao {
+public class MessageDao {
 
-    public Optional<Customer> getOptionalCustomerById(Long customerId) {
+    public Optional<Message> getOptionalMessageById(Long messageId) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            Customer customer = session.get(Customer.class, customerId);
+            Message message = session.get(Message.class, messageId);
             transaction.commit();
-            return Optional.ofNullable(customer);
+            return Optional.ofNullable(message);
         } catch (Exception e) {
             if (transaction != null) {
                 transaction.rollback();
@@ -28,15 +29,31 @@ public class CustomerDao {
         }
     }
 
-    public Customer getCustomerById(Long customerId) {
-        return getOptionalCustomerById(customerId).orElseThrow(() -> new CustomerException("Customer not found", LocalDate.now()));
+    public Message getMessageById(Long messageId) {
+        return getOptionalMessageById(messageId).orElseThrow(() -> new MessageException("Message not found", LocalDate.now()));
     }
 
-    public void createCustomer(Customer customer) {
+    public List<Message> getAllMessages() {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            session.save(customer);
+            List<Message> messages = session.createQuery("FROM Message", Message.class).list();
+            transaction.commit();
+            return messages;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+
+    public void createMessage(Message message) {
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            session.save(message);
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
@@ -46,11 +63,11 @@ public class CustomerDao {
         }
     }
 
-    public void updateCustomer(Customer customer) {
+    public void updateMessage(Message message) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            session.update(customer);
+            session.update(message);
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
@@ -60,16 +77,16 @@ public class CustomerDao {
         }
     }
 
-    public boolean deleteCustomer(Long customerId) {
+    public boolean deleteMessage(Long messageId) {
         Transaction transaction = null;
         boolean isDeleted = false;
 
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
 
-            Customer customer = session.get(Customer.class, customerId);
-            if (customer != null) {
-                session.delete(customer);
+            Message message = session.get(Message.class, messageId);
+            if (message != null) {
+                session.delete(message);
                 isDeleted = true;
             }
 
@@ -85,19 +102,7 @@ public class CustomerDao {
     }
 
 
-    public List<Customer> getAllCustomers() {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            List<Customer> customers = session.createQuery("FROM Customer", Customer.class).list();
-            transaction.commit();
-            return customers;
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            return Collections.emptyList();
-        }
-    }
+
+
+
 }
