@@ -7,7 +7,12 @@ import dto.response.EmployeeResponse;
 import exception.EmployeeException;
 import mapper.EmployeeMapper;
 import model.Employee;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.OptionalDouble;
+import java.util.stream.Collectors;
 
 public class EmployeeService {
 
@@ -57,5 +62,25 @@ public class EmployeeService {
     public EmployeeResponse getEmployeeById(Long id) {
         Employee employee = employeeDao.getEmployeeById(id).orElseThrow(() -> new EmployeeException("employee not found", LocalDate.now()));
         return employeeMapper.from(employee);
+    }
+
+    public List<EmployeeResponse> searchEmployee(String surname) {
+        List<Employee> employees = employeeDao.getAllEmployees().stream()
+                .filter(n -> n.getSurname()
+                        .equals(surname))
+                .collect(Collectors.toList());
+        List<EmployeeResponse> result = null;
+        for (Employee employee : employees) {
+            result.add(employeeMapper.from(employee));
+        }
+        return result;
+    }
+
+    public BigDecimal avgSalary() {
+        OptionalDouble average = employeeDao.getAllEmployees()
+                .stream()
+                .mapToDouble(salary -> salary.getSalary().doubleValue())
+                .average();
+        return average.isPresent() ? BigDecimal.valueOf(average.getAsDouble()) : BigDecimal.ZERO;
     }
 }

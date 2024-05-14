@@ -7,6 +7,10 @@ import dto.response.CustomerResponse;
 import mapper.CustomerMapper;
 import model.Customer;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class CustomerService {
 
     private CustomerDao customerDao;
@@ -52,4 +56,23 @@ public class CustomerService {
         Customer customer = customerDao.getCustomerById(id);
         return customerMapper.from(customer);
     }
+
+    public List<CustomerResponse> searchCustomer(String name, String surname) {
+        List<Customer> allCustomers = customerDao.getAllCustomers();
+        List<CustomerResponse> collected = allCustomers.stream()
+                .filter(c -> c.getName().equals(name) && c.getSurname().equals(surname))
+                .map(c -> customerMapper.from(c)).collect(Collectors.toList());
+        return collected;
+    }
+
+    public Map<Customer, Long> getAmountReservation() {
+        return customerDao.getAllCustomers().stream()
+                .collect(Collectors.groupingBy(
+                        customer -> customer,
+                        Collectors.summingLong(customer -> customer.getReservations().size())
+                ));
+
+
+    }
+
 }

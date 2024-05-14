@@ -3,14 +3,14 @@ import dto.request.*;
 import dto.response.*;
 import mapper.*;
 import model.Customer;
-import model.Payment;
-import model.Reservation;
 import model.enums.Status;
 import service.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
@@ -68,14 +68,14 @@ public class Main {
         ReservationMapper reservationMapper = new ReservationMapper();
         ReservationService reservationService = new ReservationService(reservationDao, roomDao, reservationMapper, customerDao, paymentDao);
         ReservationRequest request = ReservationRequest.builder()
-                .roomId(Arrays.asList(9L, 36L,38L))
+                .roomId(Arrays.asList(9L, 36L, 38L))
                 .startDate(LocalDate.now())
                 .endDate(LocalDate.of(2024, 4, 2))
                 .customerId(1L)
                 .paymentId(3L)
                 .build();
-//        ReservationResponse reservationResponse = reservationService.createReservation(request);
-//        System.out.println(reservationResponse);
+        ReservationResponse reservationResponse = reservationService.createReservation(request);
+        System.out.println(reservationResponse);
 
 //        Reservation reservation1 = Reservation.builder()
 //                .startDate(LocalDate.now())
@@ -83,6 +83,7 @@ public class Main {
 //                .build();
 //
 //        Customer customer1 = Customer.builder()
+//                .id(1l)
 //                .address("addresssao")
 //                .name("Updatek")
 //                .email("updf")
@@ -94,11 +95,50 @@ public class Main {
 //                .status(Status.FAILED)
 //                .date(LocalDate.now())
 //                .build();
-        Reservation reservation = reservationService.updateReservation(91L, request, 10L, 100L);
-        System.out.println(reservation);
+//        Reservation reservation = reservationService.updateReservation(272L, request, 1L, 3L);
+//        System.out.println(reservation);
+//
+//        System.out.println(customerService.searchCustomer("byleco2", "aaa"));
+//
+//        EmployeeDao employeeDao = new EmployeeDao();
+//        EmployeeMapper employeeMapper = new EmployeeMapper();
+//        EmployeeService employeeService = new EmployeeService(employeeDao, employeeMapper);
+//        EmployeeRequest employeeRequest = EmployeeRequest.builder()
+//                .name("Em1")
+//                .surname("Kowalska")
+//                .hireDate(LocalDate.of(2020, 4, 12))
+//                .position("Manager")
+//                .email("manager@hotel.pl")
+//                .phone("45634562")
+//                .salary(new BigDecimal(10000.0))
+//                .build();
+//        EmployeeResponse employee = employeeService.createEmployee(employeeRequest);
+//        System.out.println(employee);
+
+//
+//        List<EmployeeResponse> em1 = employeeService.searchEmployee("Em1");
+//        System.out.println(em1);
 
 
+        ReservationDetailsDao reservationDetailsDao = new ReservationDetailsDao();
 
+        MessageDao messageDao = new MessageDao();
+        MessageMapper messageMapper = new MessageMapper();
+        MessageService messageService = new MessageService(messageDao, messageMapper, customerDao, reservationDetailsDao);
+        MessageRequest messageRequest = MessageRequest.builder()
+                .customer(1l)
+                .dateTime(LocalDateTime.now())
+                .message("some text Hello Hotel")
+                .reservationDetails(273L)
+                .build();
+
+        MessageResponse messageResponse = messageService.createMessage(messageRequest);
+        System.out.println(messageResponse);
+        System.out.println();
+        Map<Customer, Long> amountReservation = customerService.getAmountReservation();
+        System.out.println(amountReservation);
+        System.out.println();
     }
+
 
 }
