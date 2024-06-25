@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public class RoomDao {
+
     public Optional<Room> getOptionalRoomById(Long roomId) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -72,7 +73,6 @@ public class RoomDao {
                 session.delete(room);
                 isDeleted = true;
             }
-
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
@@ -80,7 +80,6 @@ public class RoomDao {
             }
             e.printStackTrace();
         }
-
         return isDeleted;
     }
 }

@@ -29,8 +29,60 @@ public class CustomerDao {
     }
 
     public Customer getCustomerById(Long customerId) {
-        return getOptionalCustomerById(customerId).orElseThrow(() -> new CustomerException("Customer not found", LocalDate.now()));
+        return getOptionalCustomerById(customerId).orElseThrow(() ->
+                new CustomerException("Customer not found", LocalDate.now()));
     }
+
+    public List<Customer> getAllCustomers() {
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            List<Customer> customers = session.createQuery("from customer", Customer.class).list();
+            transaction.commit();
+            return customers;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+
+
+    public List<Customer> findByCustomerName(String name) {
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            String hql = "FROM Customer WHERE name = :name";
+            List<Customer> customers = session.createQuery(hql, Customer.class)
+                    .setParameter("name", name)
+                    .getResultList();
+            transaction.commit();
+            return customers;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+
+//    public List<Customer> findByCustomerName(String name) {
+//        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+//            Transaction transaction = session.beginTransaction();
+//            String hql = "FROM Customer WHERE name = :name";
+//            List<Customer> customers = session.createQuery(hql, Customer.class)
+//                    .setParameter("name", name)
+//                    .getResultList();
+//            transaction.commit();
+//            return customers;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return Collections.emptyList();
+//        }
+//    }
 
     public void createCustomer(Customer customer) {
         Transaction transaction = null;
@@ -82,22 +134,5 @@ public class CustomerDao {
         }
 
         return isDeleted;
-    }
-
-
-    public List<Customer> getAllCustomers() {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            List<Customer> customers = session.createQuery("FROM Customer", Customer.class).list();
-            transaction.commit();
-            return customers;
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            return Collections.emptyList();
-        }
     }
 }

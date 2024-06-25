@@ -8,7 +8,6 @@ import dto.request.UpdateMessageRequest;
 import dto.response.MessageResponse;
 import mapper.MessageMapper;
 import model.Message;
-
 import java.time.LocalDateTime;
 
 public class MessageService {
@@ -31,6 +30,24 @@ public class MessageService {
 
     }
 
+    public MessageResponse getMessageById(Long id) {
+        Message message = messageDao.getMessageById(id);
+        return messageMapper.from(message);
+    }
+
+    public MessageResponse createMessage(MessageRequest messageRequest) {
+        Message message = Message.builder()
+                .id(messageRequest.getId())
+                .customer(customerDao.getCustomerById(messageRequest.getCustomer()))
+                .reservationDetails(reservationDetailsDao.getReservationDetailsById(messageRequest.getReservationDetails()))
+                .text(messageRequest.getMessage())
+                .dateTime(messageRequest.getDateTime())
+                .build();
+
+        messageDao.createMessage(message);
+        return messageMapper.from(message);
+    }
+
     public MessageResponse updateMessage(UpdateMessageRequest updateMessageRequest) {
 
         messageDao.getMessageById(updateMessageRequest.getId());
@@ -47,26 +64,7 @@ public class MessageService {
         return messageMapper.from(message);
     }
 
-
-    public MessageResponse createMessage(MessageRequest messageRequest) {
-        Message message = Message.builder()
-                .id(messageRequest.getId())
-                .customer(customerDao.getCustomerById(messageRequest.getCustomer()))
-                .reservationDetails(reservationDetailsDao.getReservationDetailsById(messageRequest.getReservationDetails()))
-                .text(messageRequest.getMessage())
-                .dateTime(messageRequest.getDateTime())
-                .build();
-
-        messageDao.createMessage(message);
-        return messageMapper.from(message);
-    }
-
     public void deleteMessage(Long id) {
         messageDao.deleteMessage(id);
-    }
-
-    public MessageResponse getMessageById(Long id) {
-        Message message = messageDao.getMessageById(id);
-        return messageMapper.from(message);
     }
 }

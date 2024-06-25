@@ -13,7 +13,6 @@ public class RoomService {
 
     private RoomDao roomDao;
     private HotelDao hotelDao;
-
     private RoomMapper roomMapper;
 
     public RoomService(RoomDao roomDao, HotelDao hotelDao, RoomMapper roomMapper) {

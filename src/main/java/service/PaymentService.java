@@ -18,15 +18,8 @@ public class PaymentService {
         this.paymentMapper = paymentMapper;
     }
 
-    public PaymentResponse updatePayment(UpdatePaymentRequest updatePaymentRequest) {
-        paymentDao.getPaymentById(updatePaymentRequest.getId());
-        Payment payment = Payment.builder()
-                .id(updatePaymentRequest.getId())
-                .date(updatePaymentRequest.getDate())
-                .status(updatePaymentRequest.getStatus())
-                .build();
-
-        paymentDao.updatePayment(payment);
+    public PaymentResponse getPaymentById(Long id) {
+        Payment payment = paymentDao.getPaymentById(id);
         return paymentMapper.from(payment);
     }
 
@@ -40,12 +33,19 @@ public class PaymentService {
         return paymentMapper.from(payment);
     }
 
-    public void deletePayment(Long id) {
-        paymentDao.deletePayment(id);
+    public PaymentResponse updatePayment(UpdatePaymentRequest updatePaymentRequest) {
+        paymentDao.getPaymentById(updatePaymentRequest.getId());
+        Payment payment = Payment.builder()
+                .id(updatePaymentRequest.getId())
+                .date(updatePaymentRequest.getDate())
+                .status(updatePaymentRequest.getStatus())
+                .build();
+
+        paymentDao.updatePayment(payment);
+        return paymentMapper.from(payment);
     }
 
-    public PaymentResponse getPaymentById(Long id) {
-        Payment payment = paymentDao.getPaymentById(id);
-        return paymentMapper.from(payment);
+    public void deletePayment(Long id) {
+        paymentDao.deletePayment(id);
     }
 }

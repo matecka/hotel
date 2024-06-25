@@ -10,6 +10,27 @@ import java.util.Optional;
 
 public class HotelDao {
 
+    public Optional<Hotel> getOptionalHotelById(Long hotelId) {
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            Hotel hotel = session.get(Hotel.class, hotelId);
+            transaction.commit();
+            return Optional.ofNullable(hotel);
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return Optional.empty();
+        }
+    }
+
+    public Hotel getHotelById(Long hotelId) {
+        return getOptionalHotelById(hotelId)
+                .orElseThrow(() -> new HotelException("hotel not found", LocalDate.now()));
+    }
+
     public void saveHotel(Hotel hotel) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -36,27 +57,6 @@ public class HotelDao {
             }
             e.printStackTrace();
         }
-    }
-
-    public Optional<Hotel> getOptionalHotelById(Long hotelId) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            Hotel hotel = session.get(Hotel.class, hotelId);
-            transaction.commit();
-            return Optional.ofNullable(hotel);
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            return Optional.empty();
-        }
-    }
-
-    public Hotel getHotelById(Long hotelId) {
-       return getOptionalHotelById(hotelId)
-               .orElseThrow(() -> new HotelException("hotel not found", LocalDate.now()));
     }
 
     public boolean deleteHotel(Long hotelId) {

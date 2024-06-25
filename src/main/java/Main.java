@@ -2,21 +2,23 @@ import dao.*;
 import dto.request.*;
 import dto.response.*;
 import mapper.*;
-import model.Customer;
-import model.enums.Status;
 import service.*;
-
+import model.Customer;
+import model.Payment;
+import model.Reservation;
+import model.enums.Status;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
         HotelDao hotelDao = new HotelDao();
         HotelMapper hotelMapper = new HotelMapper();
-        HotelService hotelService = new HotelService(hotelDao, hotelMapper);
+        RoomMapper roomMapper = new RoomMapper();
+        HotelService hotelService = new HotelService(hotelDao, hotelMapper, roomMapper);
         HotelRequest hotelRequest = HotelRequest.builder()
                 .name("hotel2")
                 .address("Ludna 7")
@@ -28,7 +30,7 @@ public class Main {
         hotelService.deleteHotel(3L);
 
         RoomDao roomDao = new RoomDao();
-        RoomMapper roomMapper = new RoomMapper();
+//        RoomMapper roomMapper = new RoomMapper();
         RoomService roomService = new RoomService(roomDao, hotelDao, roomMapper);
         RoomRequest roomRequest = RoomRequest.builder()
                 .name("B1X")
@@ -77,45 +79,45 @@ public class Main {
         ReservationResponse reservationResponse = reservationService.createReservation(request);
         System.out.println(reservationResponse);
 
-//        Reservation reservation1 = Reservation.builder()
-//                .startDate(LocalDate.now())
-//                .endDate(LocalDate.of(2024, 3, 23))
-//                .build();
-//
-//        Customer customer1 = Customer.builder()
-//                .id(1l)
-//                .address("addresssao")
-//                .name("Updatek")
-//                .email("updf")
-//                .surname("surwisko")
-//                .phone("777 777 000")
-//                .build();
-//
-//        Payment payment1 = Payment.builder()
-//                .status(Status.FAILED)
-//                .date(LocalDate.now())
-//                .build();
-//        Reservation reservation = reservationService.updateReservation(272L, request, 1L, 3L);
-//        System.out.println(reservation);
-//
-//        System.out.println(customerService.searchCustomer("byleco2", "aaa"));
-//
-//        EmployeeDao employeeDao = new EmployeeDao();
-//        EmployeeMapper employeeMapper = new EmployeeMapper();
-//        EmployeeService employeeService = new EmployeeService(employeeDao, employeeMapper);
-//        EmployeeRequest employeeRequest = EmployeeRequest.builder()
-//                .name("Em1")
-//                .surname("Kowalska")
-//                .hireDate(LocalDate.of(2020, 4, 12))
-//                .position("Manager")
-//                .email("manager@hotel.pl")
-//                .phone("45634562")
-//                .salary(new BigDecimal(10000.0))
-//                .build();
-//        EmployeeResponse employee = employeeService.createEmployee(employeeRequest);
-//        System.out.println(employee);
+        Reservation reservation1 = Reservation.builder()
+                .startDate(LocalDate.now())
+                .endDate(LocalDate.of(2024, 3, 23))
+                .build();
 
-//
+        Customer customer1 = Customer.builder()
+                .id(1l)
+                .address("addresssao")
+                .name("Updatek")
+                .email("updf")
+                .surname("surwisko")
+                .phone("777 777 000")
+                .build();
+
+        Payment payment1 = Payment.builder()
+                .status(Status.FAILED)
+                .date(LocalDate.now())
+                .build();
+        Reservation reservation = reservationService.updateReservation(272L, request, 1L, 3L);
+        System.out.println(reservation);
+
+//        System.out.println(customerService.searchCustomer("byleco2", "aaa"));
+
+        EmployeeDao employeeDao = new EmployeeDao();
+        EmployeeMapper employeeMapper = new EmployeeMapper();
+        EmployeeService employeeService = new EmployeeService(employeeDao, employeeMapper);
+        EmployeeRequest employeeRequest = EmployeeRequest.builder()
+                .name("Em1")
+                .surname("Kowalska")
+                .hireDate(LocalDate.of(2020, 4, 12))
+                .position("Manager")
+                .email("manager@hotel.pl")
+                .phone("45634562")
+                .salary(new BigDecimal(10000.0))
+                .build();
+        EmployeeResponse employee = employeeService.createEmployee(employeeRequest);
+        System.out.println(employee);
+
+
 //        List<EmployeeResponse> em1 = employeeService.searchEmployee("Em1");
 //        System.out.println(em1);
 
@@ -135,10 +137,12 @@ public class Main {
         MessageResponse messageResponse = messageService.createMessage(messageRequest);
         System.out.println(messageResponse);
         System.out.println();
-        Map<Customer, Long> amountReservation = customerService.getAmountReservation();
-        System.out.println(amountReservation);
+//        Map<Customer, Long> amountReservation = customerService.getAmountReservation();
+//        System.out.println(amountReservation);
         System.out.println();
+//
+        List<Customer> byleco = customerDao.findByCustomerName("byleco");
+        System.out.println(byleco);
+
     }
-
-
 }

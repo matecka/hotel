@@ -70,8 +70,7 @@ public class PaymentDao {
 
             Payment payment = session.get(Payment.class, paymentId);
             if (payment != null) {
-                session.delete(payment)
-                ;
+                session.delete(payment);
                 isDeleted = true;
             }
 
@@ -82,7 +81,6 @@ public class PaymentDao {
             }
             e.printStackTrace();
         }
-
         return isDeleted;
     }
 }

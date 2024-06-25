@@ -30,14 +30,15 @@ public class MessageDao {
     }
 
     public Message getMessageById(Long messageId) {
-        return getOptionalMessageById(messageId).orElseThrow(() -> new MessageException("Message not found", LocalDate.now()));
+        return getOptionalMessageById(messageId).orElseThrow(() ->
+                new MessageException("message not found", LocalDate.now()));
     }
 
     public List<Message> getAllMessages() {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            List<Message> messages = session.createQuery("FROM Message", Message.class).list();
+            List<Message> messages = session.createQuery("from message", Message.class).list();
             transaction.commit();
             return messages;
         } catch (Exception e) {
@@ -89,7 +90,6 @@ public class MessageDao {
                 session.delete(message);
                 isDeleted = true;
             }
-
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
@@ -97,7 +97,6 @@ public class MessageDao {
             }
             e.printStackTrace();
         }
-
         return isDeleted;
     }
 

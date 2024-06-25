@@ -7,6 +7,7 @@ import dto.response.CustomerResponse;
 import mapper.CustomerMapper;
 import model.Customer;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,36 +22,6 @@ public class CustomerService {
         this.customerMapper = customerMapper;
     }
 
-    public CustomerResponse updateCustomer(UpdateCustomerRequest updateCustomerRequest) {
-        customerDao.getCustomerById(updateCustomerRequest.getId());
-
-        Customer customer = Customer.builder()
-                .id(updateCustomerRequest.getId())
-                .name(updateCustomerRequest.getName())
-                .surname(updateCustomerRequest.getSurname())
-                .phone(updateCustomerRequest.getPhone())
-                .email(updateCustomerRequest.getEmail())
-                .address(updateCustomerRequest.getAddress()).build();
-
-        customerDao.updateCustomer(customer);
-        return customerMapper.from(customer);
-    }
-
-    public CustomerResponse createCustomer(CustomerRequest customerRequest) {
-        Customer customer = Customer.builder()
-                .name(customerRequest.getName())
-                .surname(customerRequest.getSurname())
-                .phone(customerRequest.getPhone())
-                .email(customerRequest.getEmail())
-                .address(customerRequest.getAddress()).build();
-
-        customerDao.createCustomer(customer);
-        return customerMapper.from(customer);
-    }
-
-    public void deleteCustomer(Long id) {
-        customerDao.deleteCustomer(id);
-    }
 
     public CustomerResponse getCustomerById(Long id) {
         Customer customer = customerDao.getCustomerById(id);
@@ -71,8 +42,55 @@ public class CustomerService {
                         customer -> customer,
                         Collectors.summingLong(customer -> customer.getReservations().size())
                 ));
+    }
+
+    public CustomerResponse createCustomer(CustomerRequest customerRequest) {
+        Customer customer = Customer.builder()
+                .name(customerRequest.getName())
+                .surname(customerRequest.getSurname())
+                .phone(customerRequest.getPhone())
+                .email(customerRequest.getEmail())
+                .address(customerRequest.getAddress()).build();
+
+        customerDao.createCustomer(customer);
+        return customerMapper.from(customer);
+    }
+
+    public CustomerResponse updateCustomer(UpdateCustomerRequest updateCustomerRequest) {
+        customerDao.getCustomerById(updateCustomerRequest.getId());
+
+        Customer customer = Customer.builder()
+                .id(updateCustomerRequest.getId())
+                .name(updateCustomerRequest.getName())
+                .surname(updateCustomerRequest.getSurname())
+                .phone(updateCustomerRequest.getPhone())
+                .email(updateCustomerRequest.getEmail())
+                .address(updateCustomerRequest.getAddress()).build();
+
+        customerDao.updateCustomer(customer);
+        return customerMapper.from(customer);
+    }
+
+    public void deleteCustomer(Long id) {
+        customerDao.deleteCustomer(id);
+    }
 
 
+    public List<CustomerResponse> sortByNameAndSurname(){
+      return customerDao.getAllCustomers()
+                .stream()
+                .sorted(Comparator.comparing(Customer::getName)
+                        .thenComparing(Customer::getSurname))
+              .map(customerMapper::from)
+              .collect(Collectors.toList());
+    }
+
+    public List<CustomerResponse> findByEmail(String email){
+        return customerDao.getAllCustomers()
+                .stream()
+                .filter(c -> c.getEmail().equals(email))
+                .map(customerMapper::from)
+                .collect(Collectors.toList());
     }
 
 }

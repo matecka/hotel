@@ -1,16 +1,15 @@
 package dao;
 
 import config.HibernateUtil;
-import model.Customer;
 import model.Employee;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 public class EmployeeDao {
+
     public Optional<Employee> getEmployeeById(Long employeeId) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -26,6 +25,24 @@ public class EmployeeDao {
             return Optional.empty();
         }
     }
+
+
+    public List<Employee> getAllEmployees() {
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            List<Employee> employees = session.createQuery("from employee", Employee.class).list();
+            transaction.commit();
+            return employees;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+
 
     public void createEmployee(Employee employee) {
         Transaction transaction = null;
@@ -64,11 +81,9 @@ public class EmployeeDao {
 
             Employee employee = session.get(Employee.class, employeeId);
             if (employee != null) {
-                session.delete(employee)
-                ;
+                session.delete(employee);
                 isDeleted = true;
             }
-
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
@@ -76,24 +91,6 @@ public class EmployeeDao {
             }
             e.printStackTrace();
         }
-
         return isDeleted;
-    }
-
-
-    public List<Employee> getAllEmployees() {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            List<Employee> employees = session.createQuery("FROM Employee", Employee.class).list();
-            transaction.commit();
-            return employees;
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            return Collections.emptyList();
-        }
     }
 }

@@ -6,9 +6,12 @@ import model.Reservation;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public class ReservationDao {
+
     public Optional<Reservation> getOptionalReservationById(Long reservationId) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -28,6 +31,22 @@ public class ReservationDao {
     public Reservation getReservationById(Long reservationId) {
         return getOptionalReservationById(reservationId)
                 .orElseThrow(() -> new ReservationException("reservation not found", LocalDate.now()));
+    }
+
+    public List<Reservation> getAllReservations() {
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            List<Reservation> reservation = session.createQuery("from reservation", Reservation.class).list();
+            transaction.commit();
+            return reservation;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
     }
 
     public void createReservation(Reservation reservation) {
@@ -71,11 +90,9 @@ public class ReservationDao {
 
             Reservation reservation = session.get(Reservation.class, reservationId);
             if (reservation != null) {
-                session.delete(reservation)
-                ;
+                session.delete(reservation);
                 isDeleted = true;
             }
-
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
@@ -83,7 +100,6 @@ public class ReservationDao {
             }
             e.printStackTrace();
         }
-
         return isDeleted;
     }
 }

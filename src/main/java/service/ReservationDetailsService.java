@@ -10,14 +10,16 @@ public class ReservationDetailsService {
     private ReservationDetailsMapper reservationDetailsMapper;
 
 
-    public ReservationDetailsService(ReservationDetailsDao reservationDetailsDao, ReservationDetailsMapper reservationDetailsMapper) {
+    public ReservationDetailsService(ReservationDetailsDao reservationDetailsDao,
+                                     ReservationDetailsMapper reservationDetailsMapper) {
         this.reservationDetailsDao = reservationDetailsDao;
         this.reservationDetailsMapper = reservationDetailsMapper;
     }
 
 
     public ReservationDetailsResponse getReservationDetailsById(Long id) {
-        ReservationDetails reservationDetails = reservationDetailsDao.getOptionalReservationDetailsById(id).orElseThrow();
+        ReservationDetails reservationDetails =
+                reservationDetailsDao.getOptionalReservationDetailsById(id).orElseThrow();
         return reservationDetailsMapper.from(reservationDetails);
     }
 }

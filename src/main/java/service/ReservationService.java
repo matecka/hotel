@@ -9,8 +9,10 @@ import dto.response.ReservationResponse;
 import mapper.ReservationMapper;
 import model.*;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,6 +36,44 @@ public class ReservationService {
         this.paymentDao = paymentDao;
     }
 
+    public ReservationResponse getReservationById(Long id) {
+        Reservation reservation = reservationDao.getReservationById(id);
+        return reservationMapper.from(reservation);
+    }
+
+    public ReservationResponse createReservation(ReservationRequest reservationRequest) {
+        Reservation reservation = new Reservation();
+        Set<Room> rooms = reservationRequest.getRoomId().stream()
+                .map(roomId -> roomDao.getRoomById(roomId))
+                .collect(Collectors.toSet());
+
+        reservation = upsertReservation(
+                reservation,
+                reservationRequest,
+                reservationRequest.getCustomerId(),
+                reservationRequest.getPaymentId()
+        );
+
+        Set<ReservationDetails> details = createReservationDetails(rooms, reservation);
+        reservation.setReservationDetails(details);
+
+        reservationDao.createReservation(reservation);
+        return reservationMapper.from(reservation);
+    }
+
+
+    public Set<ReservationDetails> createReservationDetails(Set<Room> rooms, Reservation reservation) {
+        Set<ReservationDetails> reservationDetailsSet = new HashSet<>();
+        for (Room room : rooms) {
+            ReservationDetails reservationDetails = ReservationDetails.builder()
+                    .reservation(reservation)
+                    .room(room)
+                    .build();
+            reservationDetailsSet.add(reservationDetails);
+        }
+        return reservationDetailsSet;
+    }
+
     public Reservation updateReservation(Long reservationId,
                                          ReservationRequest reservationRequest,
                                          Long customerId,
@@ -49,7 +89,8 @@ public class ReservationService {
         return reservation;
     }
 
-    public void updateOrCreateReservationDetails(Reservation reservation, ReservationRequest reservationRequest) {
+    public void updateOrCreateReservationDetails(Reservation reservation,
+                                                 ReservationRequest reservationRequest) {
 
         Set<ReservationDetails> existingDetails = reservation.getReservationDetails();
         existingDetails = existingDetails != null ? existingDetails : new HashSet<>();
@@ -57,6 +98,33 @@ public class ReservationService {
         List<Long> newRoomIds = reservationRequest.getRoomId();
         existingDetails.removeIf(detail -> !newRoomIds.contains(detail.getRoom().getId()));
         addNewDetails(existingDetails, newRoomIds, reservation);
+    }
+
+
+    public Reservation upsertReservation(Reservation reservation,
+                                         ReservationRequest reservationRequest,
+                                         Long customerId,
+                                         Long paymentId) {
+
+        reservation.setStartDate(reservationRequest.getStartDate());
+        reservation.setEndDate(reservationRequest.getEndDate());
+        reservation.setCustomer(customerDao.getCustomerById(customerId));
+        reservation.setPayment(paymentDao.getPaymentById(paymentId));
+
+        return reservation;
+    }
+
+    public void deleteReservation(Long id) {
+        reservationDao.deleteReservation(id);
+    }
+
+    public void isExistsRoom(List<Long> roomIds) {
+    }
+
+    public Set<Room> mapByIds(List<Long> newRoomIds) {
+        return newRoomIds.stream()
+                .map(roomDao::getRoomById)
+                .collect(Collectors.toSet());
     }
 
     public void addNewDetails(Set<ReservationDetails> existingDetails,
@@ -78,66 +146,57 @@ public class ReservationService {
         existingDetails.addAll(newDetails);
     }
 
-    public void deleteReservation(Long id) {
-        reservationDao.deleteReservation(id);
+
+    public List<ReservationResponse> getReservationsInDateRange(LocalDate from, LocalDate to) {
+        return reservationDao.getAllReservations()
+                .stream()
+                .filter(r -> r.getStartDate().isAfter(from) && r.getEndDate().isBefore(to))
+                .map(reservationMapper::from)
+                .collect(Collectors.toList());
     }
 
-    public ReservationResponse getReservationById(Long id) {
-        Reservation reservation = reservationDao.getReservationById(id);
-        return reservationMapper.from(reservation);
+    public List<ReservationResponse> getReservationsByNameAndSurname(String name, String surname) {
+        return reservationDao.getAllReservations()
+                .stream()
+                .filter(r -> r.getCustomer().getName().equals(name) && r.getCustomer().getSurname().equals(surname))
+                .map(reservationMapper::from)
+                .collect(Collectors.toList());
     }
 
-    public ReservationResponse createReservation(ReservationRequest reservationRequest) {
-        Reservation reservation = new Reservation();
-        Set<Room> rooms = reservationRequest.getRoomId().stream()
-                .map(roomId -> roomDao.getRoomById(roomId))
-                .collect(Collectors.toSet());
-
-        reservation = upsertReservation(reservation, reservationRequest, reservationRequest.getCustomerId(), reservationRequest.getPaymentId());
-
-        Set<ReservationDetails> details = createReservationDetails(rooms, reservation);
-        reservation.setReservationDetails(details);
-
-        reservationDao.createReservation(reservation);
-        return reservationMapper.from(reservation);
+    public Map<Customer, Long> getCustomerReservationCount() {
+        return reservationDao.getAllReservations()
+                .stream().collect(Collectors.groupingBy(r -> r.getCustomer(), Collectors.counting()));
     }
 
-    public Set<ReservationDetails> createReservationDetails(Set<Room> rooms, Reservation reservation) {
-        Set<ReservationDetails> reservationDetailsSet = new HashSet<>();
-        for (Room room : rooms) {
-            ReservationDetails reservationDetails = ReservationDetails.builder()
-                    .reservation(reservation)
-                    .room(room)
-                    .build();
-            reservationDetailsSet.add(reservationDetails);
-        }
-        return reservationDetailsSet;
+    public int getTotalPersonCount() {
+        int sum = reservationDao.getAllReservations()
+                .stream()
+                .mapToInt(r -> r.getPersonCount())
+                .sum();
+        return sum;
     }
 
-
-    public Reservation upsertReservation(Reservation reservation,
-                                         ReservationRequest reservationRequest,
-                                         Long customerId,
-                                         Long paymentId) {
-
-        reservation.setStartDate(reservationRequest.getStartDate());
-        reservation.setEndDate(reservationRequest.getEndDate());
-        reservation.setCustomer(customerDao.getCustomerById(customerId));
-        reservation.setPayment(paymentDao.getPaymentById(paymentId));
-
-        return reservation;
+    public int getTotalPersonCountForHotel(Long hotelId) {
+        int sum = reservationDao.getAllReservations()
+                .stream()
+                .filter(r -> isReservationForHotel(r, hotelId))
+                .mapToInt(r -> r.getPersonCount())
+                .sum();
+        return sum;
     }
 
-
-    public void isExistsRoom(List<Long> roomIds) {
-
+    private boolean isReservationForHotel(Reservation reservation, Long hotelId) {
+        return reservation.getReservationDetails()
+                .stream()
+                .anyMatch(r -> r.getRoom().getHotel().getId().equals(hotelId));
     }
 
-    public Set<Room> mapByIds(List<Long> newRoomIds) {
+//    public List<String> getAllRoomNamesInHotel(Long hotelId) {
+//       return reservationDao.getAllReservations()
+//                .stream()
+//                .filter(r ->isReservationForHotel(r,hotelId))
+//    }
 
-        return newRoomIds.stream()
-                .map(roomDao::getRoomById)
-                .collect(Collectors.toSet());
-    }
+
 
 }
