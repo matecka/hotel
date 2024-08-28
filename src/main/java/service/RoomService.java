@@ -8,6 +8,9 @@ import dto.response.RoomResponse;
 import mapper.RoomMapper;
 import model.Hotel;
 import model.Room;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class RoomService {
 
@@ -15,10 +18,12 @@ public class RoomService {
     private HotelDao hotelDao;
     private RoomMapper roomMapper;
 
+
     public RoomService(RoomDao roomDao, HotelDao hotelDao, RoomMapper roomMapper) {
         this.roomDao = roomDao;
         this.hotelDao = hotelDao;
         this.roomMapper = roomMapper;
+
     }
 
     public RoomResponse getRoomById(Long id) {
@@ -62,4 +67,24 @@ public class RoomService {
         roomDao.deleteRoom(id);
     }
 
+
+    //3. Znaleźć pokoje które mają powierzchnie od-do
+    public List<RoomResponse> getRoomInRangeCapacity(Integer from, Integer to) {
+        return roomDao.getAllRoom().stream()
+                .filter(r -> r.getCapacity() >= from && r.getCapacity() <= to)
+                .map(roomMapper::from)
+                .collect(Collectors.toList());
+    }
+
+    // 2.. znaleźć pokoje które są w przedziale cenowy od-do
+
+    public List<RoomResponse> getRoomsInPriceRange(BigDecimal min, BigDecimal max) {
+        return roomDao.getAllRoom().stream()
+                .filter(r -> r.getPrice().compareTo(min) >= 1 && r.getPrice().compareTo(max) <= 1)
+                .map(roomMapper::from)
+                .collect(Collectors.toList());
+    }
 }
+
+
+

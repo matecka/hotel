@@ -6,8 +6,8 @@ import model.ReservationDetails;
 public class ReservationDetailsMapper {
     public ReservationDetailsResponse from(ReservationDetails reservationDetails){
         return ReservationDetailsResponse.builder()
-                .reservation(reservationDetails.getReservation())
-                .room(reservationDetails.getRoom())
+                .reservationId(reservationDetails.getReservation().getId())
+                .roomId(reservationDetails.getRoom().getId())
                 .build();
     }
 }

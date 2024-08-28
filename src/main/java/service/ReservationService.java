@@ -7,9 +7,13 @@ import dao.RoomDao;
 import dto.request.ReservationRequest;
 import dto.response.ReservationResponse;
 import mapper.ReservationMapper;
-import model.*;
+import model.Customer;
+import model.Reservation;
+import model.ReservationDetails;
+import model.Room;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -191,12 +195,21 @@ public class ReservationService {
                 .anyMatch(r -> r.getRoom().getHotel().getId().equals(hotelId));
     }
 
-//    public List<String> getAllRoomNamesInHotel(Long hotelId) {
-//       return reservationDao.getAllReservations()
-//                .stream()
-//                .filter(r ->isReservationForHotel(r,hotelId))
-//    }
-
+    //    4. podliczyć pobyty w danym miesiącu br
+    public Long countAllReservationsInMonth(String monthName) {
+        Month month = Month.valueOf(monthName.toUpperCase());
+        LocalDate startOfMonth = LocalDate.of(LocalDate.now().getYear(), month, 1);
+        LocalDate endOfMonth = LocalDate.of(LocalDate.now().getYear(), month, startOfMonth.lengthOfMonth());
+        return reservationDao.getAllReservations().stream()
+                .filter(r -> {
+                    LocalDate startDate = r.getStartDate();
+                    LocalDate endDate = r.getEndDate();
+                    // Usuwamy niepoprawne rezerwacje
+                    if (startDate.isAfter(endOfMonth)) return false;
+                    if (endDate.isBefore(startOfMonth)) return false;
+                    return true;
+                }).count();
+    }
 
 
 }

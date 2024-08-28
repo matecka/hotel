@@ -17,6 +17,7 @@ public class Message {
     @Id
     @GeneratedValue
     private Long id;
+    @Column(name = "date_time")
     private LocalDateTime dateTime;
     private String text;
 

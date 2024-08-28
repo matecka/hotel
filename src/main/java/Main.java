@@ -28,10 +28,12 @@ public class Main {
         HotelResponse hotel = hotelService.createHotel(hotelRequest);
         System.out.println(hotel);
         hotelService.deleteHotel(3L);
-
+        ReservationDetailsDao reservationDetailsDao = new ReservationDetailsDao();
+        ReservationDetailsMapper reservationDetailsMapper = new ReservationDetailsMapper();
+        ReservationDetailsService reservationDetailsService = new ReservationDetailsService(reservationDetailsDao, reservationDetailsMapper);
         RoomDao roomDao = new RoomDao();
 //        RoomMapper roomMapper = new RoomMapper();
-        RoomService roomService = new RoomService(roomDao, hotelDao, roomMapper);
+        RoomService roomService = new RoomService(roomDao, hotelDao, roomMapper );
         RoomRequest roomRequest = RoomRequest.builder()
                 .name("B1X")
                 .capacity(3)
@@ -52,7 +54,6 @@ public class Main {
                 .email("bylebyle@email.com")
                 .phone("333 444 222")
                 .surname("aaa").build();
-
         CustomerResponse customer = customerService.createCustomer(customerRequest);
         System.out.println(customer);
 
@@ -122,7 +123,7 @@ public class Main {
 //        System.out.println(em1);
 
 
-        ReservationDetailsDao reservationDetailsDao = new ReservationDetailsDao();
+
 
         MessageDao messageDao = new MessageDao();
         MessageMapper messageMapper = new MessageMapper();
@@ -143,6 +144,13 @@ public class Main {
 //
         List<Customer> byleco = customerDao.findByCustomerName("byleco");
         System.out.println(byleco);
+
+        LocalDate from = LocalDate.of(2024, 04, 02);
+        LocalDate to = LocalDate.of(2024, 05, 13);
+
+        List<ReservationDetailsResponse> allRoomReserved = reservationDetailsService.getAllRoomReserved(from, to);
+        System.out.println();
+        System.out.println(allRoomReserved);
 
     }
 }

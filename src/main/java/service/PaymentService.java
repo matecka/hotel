@@ -45,6 +45,11 @@ public class PaymentService {
         return paymentMapper.from(payment);
     }
 
+//    //5. Napisać metodę która liczy ile kosztował pobyt w hotelu dla danej osoby w danych dniach
+//    public BigDecimal getAmountPrice(Reservation reservation){
+//
+//    }
+
     public void deletePayment(Long id) {
         paymentDao.deletePayment(id);
     }

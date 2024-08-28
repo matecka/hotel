@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import model.Customer;
-import model.ReservationDetails;
 
 import java.time.LocalDateTime;
 
@@ -17,7 +15,7 @@ public class MessageResponse {
 
     private LocalDateTime dateTime;
     private String message;
-    private ReservationDetails reservationDetails;
-    private Customer customer;
+    private Long reservationDetailsId;
+    private Long customerId;
 
 }

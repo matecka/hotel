@@ -7,10 +7,10 @@ public class MessageMapper {
 
     public MessageResponse from(Message message){
        return MessageResponse.builder()
-                .customer(message.getCustomer())
+                .customerId(message.getCustomer().getId())
                 .dateTime(message.getDateTime())
                 .message(message.getText())
-                .reservationDetails(message.getReservationDetails())
+                .reservationDetailsId(message.getReservationDetails().getId())
                 .build();
     }
 }

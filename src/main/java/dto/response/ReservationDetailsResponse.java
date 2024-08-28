@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import model.Reservation;
-import model.Room;
 
 @Data
 @NoArgsConstructor
@@ -13,6 +11,6 @@ import model.Room;
 @Builder
 public class ReservationDetailsResponse {
 
-    private Reservation reservation;
-    private Room room;
+    private Long reservationId;
+    private Long roomId;
 }
