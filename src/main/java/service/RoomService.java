@@ -68,7 +68,7 @@ public class RoomService {
     }
 
 
-    //3. Znaleźć pokoje które mają powierzchnie od-do
+    //Znaleźć pokoje które mają powierzchnie od-do
     public List<RoomResponse> getRoomInRangeCapacity(Integer from, Integer to) {
         return roomDao.getAllRoom().stream()
                 .filter(r -> r.getCapacity() >= from && r.getCapacity() <= to)
@@ -76,8 +76,7 @@ public class RoomService {
                 .collect(Collectors.toList());
     }
 
-    // 2.. znaleźć pokoje które są w przedziale cenowy od-do
-
+    //znaleźć pokoje które są w przedziale cenowy od-do
     public List<RoomResponse> getRoomsInPriceRange(BigDecimal min, BigDecimal max) {
         return roomDao.getAllRoom().stream()
                 .filter(r -> r.getPrice().compareTo(min) >= 1 && r.getPrice().compareTo(max) <= 1)

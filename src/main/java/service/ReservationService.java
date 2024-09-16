@@ -11,7 +11,7 @@ import model.Customer;
 import model.Reservation;
 import model.ReservationDetails;
 import model.Room;
-
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.HashSet;
@@ -195,7 +195,7 @@ public class ReservationService {
                 .anyMatch(r -> r.getRoom().getHotel().getId().equals(hotelId));
     }
 
-    //    4. podliczyć pobyty w danym miesiącu br
+    //podliczyć pobyty w danym miesiącu br
     public Long countAllReservationsInMonth(String monthName) {
         Month month = Month.valueOf(monthName.toUpperCase());
         LocalDate startOfMonth = LocalDate.of(LocalDate.now().getYear(), month, 1);
@@ -211,5 +211,42 @@ public class ReservationService {
                 }).count();
     }
 
+    //Napisz metodę która liczy ile kosztował pobyt w hotelu dla danej osoby w danych dniach
+    public BigDecimal calculateStayCost(LocalDate from, LocalDate to, Long customerId) {
+        List<Reservation> reservations = reservationDao.getAllReservations()
+                .stream().filter(r -> r.getCustomer().getId().equals(customerId))
+                .filter(r -> from.isAfter(r.getStartDate())
+                        && to.isBefore(r.getEndDate())).collect(Collectors.toList());
+        return reservations.stream().flatMap(r -> r.getReservationDetails()
+                .stream().map(rd -> {
+                    BigDecimal price = rd.getRoom().getPrice();
+                    LocalDate startDate = rd.getReservation().getStartDate();
+                    LocalDate endDate = rd.getReservation().getEndDate();
+                    int days = startDate.until(endDate).getDays();
+                    BigDecimal multiply = price.multiply(new BigDecimal(days));
+                    return multiply;
+                })).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 
+    private BigDecimal calculateReservationCost(Reservation reservation) {
+        long nights = reservation.getEndDate().toEpochDay() - reservation.getStartDate().toEpochDay();
+        return reservation.getReservationDetails().stream()
+                .map(d -> d.getRoom().getPrice().multiply(BigDecimal.valueOf(nights)))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    //policz całkowity przychód hotela
+    public BigDecimal calculateIncomeByHotelId(Long hotelId) {
+        BigDecimal totalIncome = BigDecimal.ZERO;
+        List<Reservation> reservations = reservationDao.getAllReservations();
+        for (Reservation reservation : reservations) {
+            boolean belongsToHotel = reservation.getReservationDetails().stream()
+                    .anyMatch(d -> d.getRoom().getHotel().getId().equals(hotelId));
+            if (belongsToHotel) {
+                BigDecimal reservationCost = calculateReservationCost(reservation);
+                totalIncome = totalIncome.add(reservationCost);
+            }
+        }
+        return totalIncome;
+    }
 }

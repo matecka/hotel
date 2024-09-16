@@ -19,7 +19,7 @@ public class Room {
     private String description;
     private String status;
     private Integer capacity;
-    private BigDecimal price;
+    private BigDecimal price; //per room
 
     @ManyToOne
     @JoinColumn(name = "hotel_id")
