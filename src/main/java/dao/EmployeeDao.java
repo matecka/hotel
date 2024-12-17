@@ -1,96 +1,39 @@
 package dao;
-
-import config.HibernateUtil;
 import model.Employee;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class EmployeeDao {
+public class EmployeeDao extends BaseDao {
+
 
     public Optional<Employee> getEmployeeById(Long employeeId) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            Employee employee = session.get(Employee.class, employeeId);
-            transaction.commit();
-            return Optional.ofNullable(employee);
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            return Optional.empty();
-        }
+        return executeTransaction(session -> Optional.ofNullable(session.get(Employee.class, employeeId)));
     }
-
-
-    public List<Employee> getAllEmployees() {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            List<Employee> employees = session.createQuery("from employee", Employee.class).list();
-            transaction.commit();
-            return employees;
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            return Collections.emptyList();
-        }
-    }
-
 
     public void createEmployee(Employee employee) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            session.save(employee);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }
+        executeTransaction(session -> session.save(employee));
     }
 
-    public void updateEmployee(Employee employee) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
+    public Employee updateEmployee(Employee employee) {
+        return executeTransaction(session -> {
             session.update(employee);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }
+            return employee;
+        });
+    }
+
+    public List<Employee> getAllEmployees() {
+        return executeTransaction(session ->
+                session.createQuery("from Employee", Employee.class).list()
+        );
     }
 
     public boolean deleteEmployee(Long employeeId) {
-        Transaction transaction = null;
-        boolean isDeleted = false;
-
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-
+        return executeTransaction(session -> {
             Employee employee = session.get(Employee.class, employeeId);
             if (employee != null) {
                 session.delete(employee);
-                isDeleted = true;
-            }
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }
-        return isDeleted;
+                return true;}
+            return false;
+        });
     }
 }
