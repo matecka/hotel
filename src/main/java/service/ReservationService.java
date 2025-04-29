@@ -122,9 +122,6 @@ public class ReservationService {
         reservationDao.deleteReservation(id);
     }
 
-    public void isExistsRoom(List<Long> roomIds) {
-    }
-
     public Set<Room> mapByIds(List<Long> newRoomIds) {
         return newRoomIds.stream()
                 .map(roomDao::getRoomById)
@@ -195,7 +192,6 @@ public class ReservationService {
                 .anyMatch(r -> r.getRoom().getHotel().getId().equals(hotelId));
     }
 
-    //podliczyć pobyty w danym miesiącu br
     public Long countAllReservationsInMonth(String monthName) {
         Month month = Month.valueOf(monthName.toUpperCase());
         LocalDate startOfMonth = LocalDate.of(LocalDate.now().getYear(), month, 1);
@@ -204,14 +200,12 @@ public class ReservationService {
                 .filter(r -> {
                     LocalDate startDate = r.getStartDate();
                     LocalDate endDate = r.getEndDate();
-                    // Usuwamy niepoprawne rezerwacje
                     if (startDate.isAfter(endOfMonth)) return false;
                     if (endDate.isBefore(startOfMonth)) return false;
                     return true;
                 }).count();
     }
 
-    //Napisz metodę która liczy ile kosztował pobyt w hotelu dla danej osoby w danych dniach
     public BigDecimal calculateStayCost(LocalDate from, LocalDate to, Long customerId) {
         List<Reservation> reservations = reservationDao.getAllReservations()
                 .stream().filter(r -> r.getCustomer().getId().equals(customerId))
@@ -235,7 +229,6 @@ public class ReservationService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    //policz całkowity przychód hotela
     public BigDecimal calculateIncomeByHotelId(Long hotelId) {
         BigDecimal totalIncome = BigDecimal.ZERO;
         List<Reservation> reservations = reservationDao.getAllReservations();

@@ -1,31 +1,16 @@
 package dao;
 
-import config.HibernateUtil;
 import exception.RoomException;
 import model.Room;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class RoomDao {
+public class RoomDao extends BaseDao {
 
     public Optional<Room> getOptionalRoomById(Long roomId) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            Room room = session.get(Room.class, roomId);
-            transaction.commit();
-            return Optional.ofNullable(room);
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            return Optional.empty();
-        }
+        return executeTransaction(session ->
+                Optional.ofNullable(session.get(Room.class, roomId)));
     }
 
     public Room getRoomById(Long roomId) {
@@ -34,70 +19,30 @@ public class RoomDao {
     }
 
     public List<Room> getAllRoom() {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            List<Room> rooms = session.createQuery("from room", Room.class).list();
-            transaction.commit();
-            return rooms;
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            return Collections.emptyList();
-        }
+        return executeTransaction(session ->
+                session.createQuery("from Room", Room.class).list());
     }
-
 
 
     public void createRoom(Room room) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            session.save(room);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }
+        executeTransaction(session -> session.save(room));
     }
 
-    public void updateRoom(Room room) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
+    public Room updateRoom(Room room) {
+        return executeTransaction(session -> {
             session.update(room);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }
+            return room;
+        });
     }
 
     public boolean deleteRoom(Long roomId) {
-        Transaction transaction = null;
-        boolean isDeleted = false;
-
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-
+        return executeTransaction(session -> {
             Room room = session.get(Room.class, roomId);
             if (room != null) {
                 session.delete(room);
-                isDeleted = true;
+                return true;
             }
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }
-        return isDeleted;
+            return false;
+        });
     }
 }

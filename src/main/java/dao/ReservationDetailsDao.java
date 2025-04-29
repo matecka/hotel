@@ -5,7 +5,6 @@ import exception.ReservationDetailsException;
 import model.ReservationDetails;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -18,12 +17,9 @@ public class ReservationDetailsDao {
 
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-
             ReservationDetails reservationDetails =
                     session.get(ReservationDetails.class, reservationDetailsId);
-
             transaction.commit();
-
             return Optional.ofNullable(reservationDetails);
         } catch (Exception e) {
 
@@ -47,7 +43,8 @@ public class ReservationDetailsDao {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            List<ReservationDetails> reservationDetails = session.createQuery("from ReservationDetails", ReservationDetails.class).list();
+            List<ReservationDetails> reservationDetails =
+                    session.createQuery("from ReservationDetails", ReservationDetails.class).list();
             transaction.commit();
             return reservationDetails;
         } catch (Exception e) {
@@ -58,5 +55,4 @@ public class ReservationDetailsDao {
             return Collections.emptyList();
         }
     }
-
 }

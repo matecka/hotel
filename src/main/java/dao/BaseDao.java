@@ -3,7 +3,6 @@ package dao;
 import config.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
 import java.util.function.Function;
 
 public abstract class BaseDao {
@@ -23,6 +22,4 @@ public abstract class BaseDao {
             throw new RuntimeException("Transaction Field", e);
         }
     }
-
-
 }

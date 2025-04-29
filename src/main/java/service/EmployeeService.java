@@ -7,7 +7,6 @@ import dto.response.EmployeeResponse;
 import exception.EmployeeException;
 import mapper.EmployeeMapper;
 import model.Employee;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -41,7 +40,7 @@ public class EmployeeService {
     }
 
     public EmployeeResponse updateEmployee(UpdateEmployeeRequest updateEmployeeRequest) {
-        employeeDao.getEmployeeById(updateEmployeeRequest.getId()).orElseThrow(() -> new EmployeeException("employee not found", LocalDate.now()));
+        employeeDao.getOptionalEmployeeById(updateEmployeeRequest.getId()).orElseThrow(() -> new EmployeeException("employee not found", LocalDate.now()));
 
         Employee employee = Employee.builder()
                 .id(updateEmployeeRequest.getId())
@@ -63,22 +62,9 @@ public class EmployeeService {
 
 
     public EmployeeResponse getEmployeeById(Long id) {
-        Employee employee = employeeDao.getEmployeeById(id).orElseThrow(() -> new EmployeeException("employee not found", LocalDate.now()));
+        Employee employee = employeeDao.getOptionalEmployeeById(id).orElseThrow(() -> new EmployeeException("employee not found", LocalDate.now()));
         return employeeMapper.from(employee);
     }
-
-//    public List<EmployeeResponse> searchEmployee(String surname) {
-//        List<Employee> employees = employeeDao.getAllEmployees().stream()
-//                .filter(n -> n.getSurname()
-//                        .equals(surname))
-//                .collect(Collectors.toList());
-//        List<EmployeeResponse> result = null;
-//        for (Employee employee : employees) {
-//            result.add(employeeMapper.from(employee));
-//        }
-//        return result;
-//    }
-
 
     public List<EmployeeResponse> searchEmployee(String surname) {
         return employeeDao.getAllEmployees().stream()
@@ -86,7 +72,6 @@ public class EmployeeService {
                 .map(employeeMapper::from)
                 .collect(Collectors.toList());
     }
-
 
     public BigDecimal avgSalary() {
         OptionalDouble average = employeeDao.getAllEmployees()
@@ -106,15 +91,14 @@ public class EmployeeService {
         return max.isPresent() ? BigDecimal.valueOf(max.getAsDouble()) : BigDecimal.ZERO;
     }
 
-    public BigDecimal findMaxSalary2(String nameHotel) {
+    public BigDecimal findMaxSalary() {
         Employee employee = employeeDao.getAllEmployees()
                 .stream()
                 .max(Comparator.comparing(Employee::getSalary))
-                .orElseThrow(() -> new EmployeeException("lack", LocalDate.now()));
+                .orElseThrow(() -> new EmployeeException("lack of employees", LocalDate.now()));
         return new BigDecimal(employee.getSalary().doubleValue());
 
     }
-
 
     public EmployeeResponse findEmployeeWithMaxSalary(String nameHotel) {
         Employee employee1 = employeeDao.getAllEmployees()

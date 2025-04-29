@@ -60,15 +60,8 @@ public class RoomService {
 
         roomDao.updateRoom(room);
         return roomMapper.from(room);
-
     }
 
-    public void deleteRoom(Long id) {
-        roomDao.deleteRoom(id);
-    }
-
-
-    //Znaleźć pokoje które mają powierzchnie od-do
     public List<RoomResponse> getRoomInRangeCapacity(Integer from, Integer to) {
         return roomDao.getAllRoom().stream()
                 .filter(r -> r.getCapacity() >= from && r.getCapacity() <= to)
@@ -76,12 +69,15 @@ public class RoomService {
                 .collect(Collectors.toList());
     }
 
-    //znaleźć pokoje które są w przedziale cenowy od-do
     public List<RoomResponse> getRoomsInPriceRange(BigDecimal min, BigDecimal max) {
         return roomDao.getAllRoom().stream()
                 .filter(r -> r.getPrice().compareTo(min) >= 1 && r.getPrice().compareTo(max) <= 1)
                 .map(roomMapper::from)
                 .collect(Collectors.toList());
+    }
+
+    public void deleteRoom(Long id) {
+        roomDao.deleteRoom(id);
     }
 }
 

@@ -57,7 +57,7 @@ public class HotelService {
         hotelDao.deleteHotel(id);
     }
 
-    public List<RoomResponse> geRoomsBetweenPrices(Long id, BigDecimal from, BigDecimal to) {
+    public List<RoomResponse> getRoomsBetweenPrices(Long id, BigDecimal from, BigDecimal to) {
         return hotelDao.getHotelById(id).getRooms()
                 .stream().filter(r -> r.getPrice().compareTo(from) >= 1 && r.getPrice().compareTo(to) <= 1)
                 .map(roomMapper::from)

@@ -1,105 +1,47 @@
 package dao;
 
-import config.HibernateUtil;
 import exception.ReservationException;
 import model.Reservation;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class ReservationDao {
+public class ReservationDao extends BaseDao {
 
     public Optional<Reservation> getOptionalReservationById(Long reservationId) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            Reservation reservation = session.get(Reservation.class, reservationId);
-            transaction.commit();
-            return Optional.ofNullable(reservation);
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            return Optional.empty();
-        }
+        return executeTransaction(session ->
+                Optional.ofNullable(session.get(Reservation.class, reservationId)));
     }
 
     public Reservation getReservationById(Long reservationId) {
         return getOptionalReservationById(reservationId)
-                .orElseThrow(() -> new ReservationException("reservation not found", LocalDate.now()));
+                .orElseThrow(() -> new ReservationException("Reservation not found", LocalDate.now()));
     }
 
     public List<Reservation> getAllReservations() {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            List<Reservation> reservation = session.createQuery("from reservation", Reservation.class).list();
-            transaction.commit();
-            return reservation;
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            return Collections.emptyList();
-        }
+        return executeTransaction(session ->
+                session.createQuery("from Reservation", Reservation.class).list());
     }
 
     public void createReservation(Reservation reservation) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            session.save(reservation);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }
+        executeTransaction(session -> session.save(reservation));
     }
 
     public Reservation updateReservation(Reservation reservation) {
-        Transaction transaction = null;
-        Reservation updatedReservation = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
+        return executeTransaction(session -> {
             session.update(reservation);
-            updatedReservation = session.get(Reservation.class, reservation.getId());
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }
-        return updatedReservation;
+            return reservation;
+        });
     }
 
-
     public boolean deleteReservation(Long reservationId) {
-        Transaction transaction = null;
-        boolean isDeleted = false;
-
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-
+        return executeTransaction(session -> {
             Reservation reservation = session.get(Reservation.class, reservationId);
             if (reservation != null) {
                 session.delete(reservation);
-                isDeleted = true;
+                return true;
             }
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        }
-        return isDeleted;
+            return false;
+        });
     }
 }

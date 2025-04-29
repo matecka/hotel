@@ -8,9 +8,9 @@ import java.util.Optional;
 
 public class CustomerDao extends BaseDao {
 
-
     public Optional<Customer> getOptionalCustomerById(Long customerId) {
-        return executeTransaction(session -> Optional.ofNullable(session.get(Customer.class, customerId)));
+        return executeTransaction(session ->
+                Optional.ofNullable(session.get(Customer.class, customerId)));
     }
 
     public Customer getCustomerById(Long customerId) {

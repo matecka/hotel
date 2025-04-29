@@ -26,8 +26,6 @@ public class ReservationDetailsService {
         return reservationDetailsMapper.from(reservationDetails);
     }
 
-
-    //1. znaleźć pokoje które są zarezerwowane
     public List<ReservationDetailsResponse> getAllRoomReserved(LocalDate dateFrom, LocalDate dateTo) {
         return reservationDetailsDao.getAllReservationDetails().stream()
                 .filter(rd -> {

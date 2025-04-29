@@ -5,34 +5,23 @@ import exception.MessageException;
 import model.Message;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class MessageDao {
+public class MessageDao extends BaseDao {
 
     public Optional<Message> getOptionalMessageById(Long messageId) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            Message message = session.get(Message.class, messageId);
-            transaction.commit();
-            return Optional.ofNullable(message);
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            return Optional.empty();
-        }
+        return executeTransaction(session ->
+                Optional.ofNullable(session.get(Message.class, messageId)));
     }
 
     public Message getMessageById(Long messageId) {
         return getOptionalMessageById(messageId).orElseThrow(() ->
-                new MessageException("message not found", LocalDate.now()));
+                new MessageException("Message not found", LocalDate.now()));
     }
+
 
     public List<Message> getAllMessages() {
         Transaction transaction = null;
@@ -81,10 +70,8 @@ public class MessageDao {
     public boolean deleteMessage(Long messageId) {
         Transaction transaction = null;
         boolean isDeleted = false;
-
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-
             Message message = session.get(Message.class, messageId);
             if (message != null) {
                 session.delete(message);
@@ -99,9 +86,4 @@ public class MessageDao {
         }
         return isDeleted;
     }
-
-
-
-
-
 }
